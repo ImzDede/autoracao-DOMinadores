@@ -1,0 +1,22 @@
+/* Estilos personalizados para o Canvas e Logs */
+
+canvas {
+    background-color: #f0f9ff; /* Fundo azul claro */
+    border: 2px solid #3b82f6;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    cursor: crosshair; 
+    max-width: 100%; /* Garante responsividade básica */
+    height: auto;
+}
+
+.log-entry {
+    border-bottom: 1px solid #eee;
+    padding: 4px 0;
+    animation: fadeIn 0.3s ease-in;
+}
+
+/* Animação suave para novos logs */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
