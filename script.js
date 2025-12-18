@@ -179,26 +179,28 @@ function goalOrientedRobot({ place, parcels }, route) {
 }
 
 /**
- * ==========================================
- * PARTE 4: VISUALIZAÇÃO E CONTROLE (VIEW/CONTROLLER)
- * ==========================================
- */
+         * ==========================================
+         * PARTE 4: VISUALIZAÇÃO E CONTROLE (VIEW/CONTROLLER)
+         * Temas 3, 4, 5, 6 e 7 trabalharão muito aqui.
+         * ==========================================
+         */
 
-let currentState = null;
-let currentRobot = null;
-let robotMemory = [];
-let turnCount = 0;
-let simulationTimeout = null;
+let currentState = null;     // Estado atual do vilarejo
+let currentRobot = null;     // Função do robô atual
+let robotMemory = [];        // Memória do robô (para alguns algoritmos)
+let turnCount = 0;           // Contador de passos
+let simulationTimeout = null; // Referência do timeout para controle
 
-// TEMA 6: Controle de velocidade
-// Iniciamos com 800ms
-let animationSpeed = 800;
+// Tema 6: deve tornar isso dinâmico
+let animationSpeed = 800;    // Velocidade da animação em ms
 
+// Elementos DOM
 const canvas = document.getElementById('villageCanvas');
 const ctx = canvas.getContext('2d');
 const logContainer = document.getElementById('logContainer');
 
 function init() {
+    // Inicializa a simulação: estado aleatório, desenha vilarejo, atualiza UI
     currentState = VillageState.random();
     drawVillage(currentState);
     updateStatusUI();
@@ -206,68 +208,84 @@ function init() {
 }
 
 function startSimulation() {
-    if (simulationTimeout) return;
+    if (simulationTimeout) return; // Evita múltiplas execuções
 
     const robotType = document.getElementById('robotSelect').value;
+
+    // Seleciona o tipo de algoritmo, ou seja, 
+    // configura o algoritmo do robô baseado na seleção do usuário
 
     if (robotType === 'random') currentRobot = randomRobot;
     else if (robotType === 'route') currentRobot = routeRobot;
     else currentRobot = goalOrientedRobot;
 
-    robotMemory = [];
-    runTurn();
+    robotMemory = []; // Reseta memória do robô
+    runTurn(); // Inicia loop principal
 }
 
 function runTurn() {
+    // Executa um turno da simulação (movimento + atualização)
+
     if (currentState.parcels.length == 0) {
+        // Condição de vitória: todas encomendas entregues
         logAction(`<strong>FIM!</strong> Todas as entregas concluídas em ${turnCount} passos.`);
         simulationTimeout = null;
         return;
     }
 
+    // 1. O robô decide
     let action = currentRobot(currentState, robotMemory);
+
+    // 2. O estado atualiza (Imutabilidade)
     let nextState = currentState.move(action.direction);
 
+    // Detecção simples de entrega para log (Tema 2 pode melhorar isso)
     if (nextState.parcels.length < currentState.parcels.length) {
         logAction(`📦 Entrega realizada em: ${action.direction}`);
     } else {
         logAction(`Movendo para: ${action.direction}`);
     }
 
+    // 3. Atualiza variáveis globais
     currentState = nextState;
     robotMemory = action.memory;
     turnCount++;
 
+    // 4. Redesenha e Atualiza UI
     drawVillage(currentState);
     updateStatusUI();
 
-    // Aqui a mágica do Tema 6 acontece:
-    // O setTimeout usa a variável animationSpeed que agora é dinâmica
+    // 5. Agenda o próximo turno (Loop de animação)
     simulationTimeout = setTimeout(runTurn, animationSpeed);
 }
 
 function stopSimulation() {
+    // Para a execução da simulação
     clearTimeout(simulationTimeout);
     simulationTimeout = null;
 }
 
 function resetSimulation() {
+    // Reinicia completamente a simulação
     stopSimulation();
     turnCount = 0;
-    logContainer.innerHTML = '';
-    init();
+    logContainer.innerHTML = ''; // Limpa logs
+    init(); // Reinicializa
 }
 
 function updateStatusUI() {
+    // Atualiza contadores na interface
     document.getElementById('stepCount').innerText = turnCount;
     document.getElementById('parcelCount').innerText = currentState.parcels.length;
 }
 
+// Função auxiliar de Log (Tema 2 deve melhorar HTML/CSS aqui)
 function logAction(message) {
+    // Adiciona entrada ao log de ações
     const div = document.createElement('div');
     div.className = 'log-entry';
     div.innerHTML = `Passo ${turnCount}: ${message}`;
-    logContainer.prepend(div);
+    logContainer.prepend(div);  // Adiciona no topo
 }
 
 /**
@@ -329,21 +347,21 @@ function drawVillage(state) {
 
     // 4. Desenhar Robô
     const robotLoc = locations[state.place];
-            if(robotLoc) {
-                ctx.fillStyle = "#10b981"; // Verde
-                ctx.beginPath();
-                ctx.arc(robotLoc.x, robotLoc.y, 20, 0, Math.PI * 2);
-                ctx.fill();
-                
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = "#fff";
-                ctx.stroke();
+    if (robotLoc) {
+        ctx.fillStyle = "#10b981"; // Verde
+        ctx.beginPath();
+        ctx.arc(robotLoc.x, robotLoc.y, 20, 0, Math.PI * 2);
+        ctx.fill();
 
-                // Letra 'R' no robô
-                ctx.fillStyle = "white";
-                ctx.font = "bold 16px Arial";
-                ctx.fillText("R", robotLoc.x, robotLoc.y + 5);
-            }
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "#fff";
+        ctx.stroke();
+
+        // Letra 'R' no robô
+        ctx.fillStyle = "white";
+        ctx.font = "bold 16px Arial";
+        ctx.fillText("R", robotLoc.x, robotLoc.y + 5);
+    }
 
     // Dica para Tema 5: Desenhar a rota (linha tracejada) aqui
 }
@@ -373,14 +391,14 @@ speedSlider.addEventListener('input', (event) => {
     roboLentoGif.classList.add('hidden');
 
     // Remove o style hidden das imagens de acordo com velocidade do robo
-    if (animationSpeed < 400) { // Se for muito rápido (<400ms)
+    if (animationSpeed < 500) { // Se for muito rápido (<500ms)
         roboRapidoGif.classList.remove('hidden');
-    } else if (animationSpeed > 1200) { // Se for muito lento (>1200ms)
-        roboLentoGif.classList.remove('hidden'); 
+    } else if (animationSpeed > 1500) { // Se for muito lento (>1500ms)
+        roboLentoGif.classList.remove('hidden');
     } else {
         roboNormalGif.classList.remove('hidden');
     }
-    
+
 });
 
 // Inicializa tudo
