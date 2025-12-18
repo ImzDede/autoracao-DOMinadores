@@ -33,14 +33,6 @@ const locations = {
     "Marketplace": { x: 200, y: 350 }
 };
 
-// Carregamento das imagens do robô
-const imgRoboNormal = new Image();
-imgRoboNormal.src = './GIFs/normal.gif';
-const imgRoboRapido = new Image();
-imgRoboRapido.src = './GIFs/rapido.gif';
-const imgRoboLento = new Image();
-imgRoboLento.src = './GIFs/lento.gif';
-
 function buildGraph(edges) {
     // Constrói um grafo de conexões a partir do array de estradas
     // Entrada: array de strings no formato "Local1-Local2"
@@ -337,23 +329,21 @@ function drawVillage(state) {
 
     // 4. Desenhar Robô
     const robotLoc = locations[state.place];
-    if (robotLoc) {
-        // Define o tamanho da imagem
-        const size = 80; 
-        const offset = size / 2;
+            if(robotLoc) {
+                ctx.fillStyle = "#10b981"; // Verde
+                ctx.beginPath();
+                ctx.arc(robotLoc.x, robotLoc.y, 20, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = "#fff";
+                ctx.stroke();
 
-        // Lógica de escolha da imagem baseada na velocidade
-        let imgAtual = imgRoboNormal; // Padrão
-        
-        if (animationSpeed < 400) {
-            imgAtual = imgRoboRapido; // Se for muito rápido (<400ms)
-        } else if (animationSpeed > 1200) {
-            imgAtual = imgRoboLento; // Se for muito lento (>1200ms)
-        }
-
-        // Desenha a imagem escolhida centralizada
-        ctx.drawImage(imgAtual, robotLoc.x - offset, robotLoc.y - offset, size, size);
-    }
+                // Letra 'R' no robô
+                ctx.fillStyle = "white";
+                ctx.font = "bold 16px Arial";
+                ctx.fillText("R", robotLoc.x, robotLoc.y + 5);
+            }
 
     // Dica para Tema 5: Desenhar a rota (linha tracejada) aqui
 }
@@ -366,12 +356,31 @@ function drawVillage(state) {
 const speedSlider = document.getElementById('speedSlider');
 const speedDisplay = document.getElementById('speedDisplay');
 
+const roboNormalGif = document.getElementById('rNormal');
+const roboRapidoGif = document.getElementById('rRapido');
+const roboLentoGif = document.getElementById('rLento');
+
 speedSlider.addEventListener('input', (event) => {
     // Atualiza a variável global de velocidade
     animationSpeed = parseInt(event.target.value);
 
     // Atualiza o texto na tela para o usuário ver
     speedDisplay.innerText = animationSpeed;
+
+    // Adiciona o style hidden nas imagens do robo
+    roboNormalGif.classList.add('hidden');
+    roboRapidoGif.classList.add('hidden');
+    roboLentoGif.classList.add('hidden');
+
+    // Remove o style hidden das imagens de acordo com velocidade do robo
+    if (animationSpeed < 400) { // Se for muito rápido (<400ms)
+        roboRapidoGif.classList.remove('hidden');
+    } else if (animationSpeed > 1200) { // Se for muito lento (>1200ms)
+        roboLentoGif.classList.remove('hidden'); 
+    } else {
+        roboNormalGif.classList.remove('hidden');
+    }
+    
 });
 
 // Inicializa tudo
